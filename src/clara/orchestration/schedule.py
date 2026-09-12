@@ -10,9 +10,9 @@ from __future__ import annotations
 
 import calendar
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Iterator
 
 from clara.errors import ValidationError
 from clara.time_utils import UTC, ensure_utc, utcnow

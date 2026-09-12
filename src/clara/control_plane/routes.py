@@ -10,11 +10,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, Query
 
 from clara import branding
 from clara.catalog.base import TableRef
-from clara.connectors import build_source, configure_streams, source_specs
+from clara.connectors import build_source, source_specs
 from clara.control_plane.schemas import (
     ConnectorConfigRequest,
     CreditPurchaseRequest,
@@ -28,7 +28,7 @@ from clara.control_plane.schemas import (
 from clara.control_plane.security import require_auth
 from clara.control_plane.state import PlatformState, get_state
 from clara.engines.warehouse import recommend_size
-from clara.errors import ClaraError, NotFoundError, ValidationError
+from clara.errors import ClaraError, ValidationError
 from clara.logging_setup import get_logger
 from clara.metering import Plan, competitor_comparison
 from clara.metering.events import Meter

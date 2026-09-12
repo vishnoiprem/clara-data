@@ -14,7 +14,8 @@ properties matter for cost and safety —
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 from clara.connectors.base import CheckResult, ConnectorSpec, Source
 from clara.connectors.protocol import (

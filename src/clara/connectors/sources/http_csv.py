@@ -10,7 +10,8 @@ from __future__ import annotations
 import csv
 import io
 import json
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 from clara.catalog.schema import Schema
 from clara.connectors.base import CheckResult, ConnectorSpec, Source

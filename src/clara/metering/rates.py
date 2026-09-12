@@ -211,7 +211,7 @@ PLANS: dict[Plan, PlanSpec] = {
         # The whole point: run it yourself, pay Clara nothing, forever.
         fee_bands=(),
         monthly_minimum_usd=0.0,
-        included={m: INF for m in Meter},
+        included=dict.fromkeys(Meter, INF),
         limits=PlanLimits(retention_days=90),
         support="community forum",
     ),
@@ -262,7 +262,7 @@ PLANS: dict[Plan, PlanSpec] = {
         fee_bands=(FeeBand(INF, 0.08),),
         monthly_minimum_usd=4_999.0,
         addon_rates={Meter.INGEST: 0.01},
-        included={m: INF for m in (Meter.INGEST, Meter.ORCHESTRATION, Meter.API)},
+        included=dict.fromkeys((Meter.INGEST, Meter.ORCHESTRATION, Meter.API), INF),
         limits=PlanLimits(retention_days=1095),
         commitments_available=True,
         support="dedicated engineer, 1h response",

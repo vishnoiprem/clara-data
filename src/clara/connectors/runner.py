@@ -15,7 +15,6 @@ from typing import Any
 
 from clara.connectors.base import Destination, Source
 from clara.connectors.protocol import (
-    AirbyteMessage,
     ConfiguredStream,
     MessageType,
     SyncMode,

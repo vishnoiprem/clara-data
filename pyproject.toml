@@ -85,7 +85,11 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
-ignore = ["B008"]  # FastAPI Depends() in defaults is idiomatic
+ignore = [
+    "B008",  # FastAPI Depends() in argument defaults is the documented idiom
+    "B027",  # empty methods in an ABC are deliberate optional hooks, not bugs
+    "E501",  # long lines are almost all prose in docstrings; not worth churn
+]
 
 [tool.mypy]
 python_version = "3.10"

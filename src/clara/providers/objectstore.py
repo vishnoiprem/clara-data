@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import shutil
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from clara.errors import NotFoundError, ProviderError, require
 from clara.logging_setup import get_logger

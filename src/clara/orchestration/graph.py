@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict, deque
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from clara.errors import ValidationError
 

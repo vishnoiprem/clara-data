@@ -13,6 +13,7 @@ when the target customer is running on commodity hardware.
 
 from __future__ import annotations
 
+import contextlib
 import time
 from typing import Any
 
@@ -106,10 +107,9 @@ class TrinoEngine(Engine):
 
     def close(self) -> None:
         if self._connection is not None:
-            try:
+            # Closing must never raise: it runs in teardown paths.
+            with contextlib.suppress(Exception):
                 self._connection.close()
-            except Exception:  # noqa: BLE001 - closing must not raise
-                pass
             self._connection = None
 
     # -------------------------------------------------------------- execution

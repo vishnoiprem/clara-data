@@ -27,7 +27,7 @@ from clara.engines.router import EngineRouter
 from clara.errors import ConnectorError, ValidationError
 from clara.orchestration import PipelineExecutor
 from clara.orchestration.schedule import CronSchedule, is_due, next_run_at
-from clara.spec import STARTER_SPEC, PlatformSpec, parse_spec, save_spec
+from clara.spec import STARTER_SPEC, parse_spec, save_spec
 from clara.spec.loader import interpolate, load_spec
 from clara.transform.models import Materialization, Model
 from clara.transform.runner import TransformRunner

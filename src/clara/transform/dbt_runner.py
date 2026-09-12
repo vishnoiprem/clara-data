@@ -25,8 +25,8 @@ import yaml
 from clara.errors import DependencyMissingError, ValidationError
 from clara.logging_setup import get_logger
 from clara.settings import Settings, get_settings
-from clara.transform.runner import ModelResult, TransformResult
 from clara.time_utils import utcnow
+from clara.transform.runner import ModelResult, TransformResult
 
 log = get_logger(__name__)
 

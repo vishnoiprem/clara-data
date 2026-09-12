@@ -212,7 +212,7 @@ class StreamDescriptor:
 
     def to_schema(self):  # noqa: ANN201 - avoids importing Schema at module load
         """Convert the stream's JSON schema into a Clara table schema."""
-        from clara.catalog.schema import DataType, Field_, Schema
+        from clara.catalog.schema import Field_, Schema
 
         properties = (self.json_schema or {}).get("properties", {})
         required = set((self.json_schema or {}).get("required", []))

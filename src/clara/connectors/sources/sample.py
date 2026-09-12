@@ -13,8 +13,9 @@ on values.
 from __future__ import annotations
 
 import random
+from collections.abc import Iterator
 from datetime import timedelta
-from typing import Any, Iterator
+from typing import Any
 
 from clara.connectors.base import CheckResult, ConnectorSpec, Source
 from clara.connectors.protocol import (

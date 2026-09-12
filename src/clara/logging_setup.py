@@ -24,9 +24,7 @@ _CONFIGURED = False
 
 #: Attributes present on every LogRecord; anything else is caller-supplied extra.
 _STANDARD = frozenset(
-    """name msg args levelname levelno pathname filename module exc_info exc_text
-    stack_info lineno funcName created msecs relativeCreated thread threadName
-    process processName taskName getMessage message asctime""".split()
+    ["name", "msg", "args", "levelname", "levelno", "pathname", "filename", "module", "exc_info", "exc_text", "stack_info", "lineno", "funcName", "created", "msecs", "relativeCreated", "thread", "threadName", "process", "processName", "taskName", "getMessage", "message", "asctime"]
 )
 
 _LEVEL_COLORS = {

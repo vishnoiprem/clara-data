@@ -22,7 +22,6 @@ from clara.metering import (
     CreditLedger,
     EfficiencyBaseline,
     InMemoryUsageStore,
-    Invoice,
     LineKind,
     Meter,
     Plan,

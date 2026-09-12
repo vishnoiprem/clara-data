@@ -9,8 +9,9 @@ send a small query to DuckDB (cheap, milliseconds) and a large one to Trino.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 from clara.catalog.base import TableRef
 from clara.time_utils import format_duration

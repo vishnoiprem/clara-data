@@ -8,9 +8,10 @@ single view of the platform rather than each request rebuilding connections.
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from clara.catalog import Catalog, get_catalog
 from clara.engines import EngineRouter, get_router
