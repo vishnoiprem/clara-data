@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clara Data — Lakehouse Console</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <div>
+      <div class="brand-name">Clara Data</div>
+      <div class="brand-sub" id="brand-sub">lakehouse console</div>
+    </div>
+  </div>
+  <nav class="nav" id="nav">
+    <button class="nav-item is-active" data-view="dashboard">Overview</button>
+    <button class="nav-item" data-view="builder">Build pipeline</button>
+    <button class="nav-item" data-view="data">Data</button>
+    <button class="nav-item" data-view="sql">SQL</button>
+    <button class="nav-item" data-view="runs">Runs</button>
+    <button class="nav-item" data-view="cost">Cost</button>
+  </nav>
+  <div class="topbar-right">
+    <span class="pill" id="env-pill">…</span>
+    <button class="btn btn-ghost btn-icon" id="theme-toggle" title="Toggle theme">◐</button>
+    <button class="btn btn-ghost" id="key-btn" title="API key">Key</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ─────────────────────────────── OVERVIEW ─────────────────────────────── -->
+<section class="view is-active" id="view-dashboard">
+  <div class="view-head">
+    <h1>Overview</h1>
+    <div class="row-actions">
+      <button class="btn btn-primary" id="dash-run">Run pipeline</button>
+      <button class="btn" id="dash-refresh">Refresh</button>
+    </div>
+  </div>
+
+  <div class="stat-grid" id="stat-grid"></div>
+
+  <div class="split">
+    <div class="card">
+      <div class="card-head"><h2>Pipeline</h2><span class="muted" id="dash-project"></span></div>
+      <div id="dash-lineage" class="lineage"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Recent runs</h2></div>
+      <div id="dash-runs"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Tables</h2><span class="muted" id="dash-table-note"></span></div>
+    <div id="dash-tables"></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── BUILDER ──────────────────────────────── -->
+<section class="view" id="view-builder">
+  <div class="view-head">
+    <h1>Build a pipeline</h1>
+    <span class="muted">Source → tables → transform → schedule. Saved as <code>clara.yaml</code>.</span>
+  </div>
+
+  <ol class="steps" id="steps">
+    <li class="step is-active" data-step="1"><span class="step-n">1</span>Connect source</li>
+    <li class="step" data-step="2"><span class="step-n">2</span>Choose data</li>
+    <li class="step" data-step="3"><span class="step-n">3</span>Raw tables</li>
+    <li class="step" data-step="4"><span class="step-n">4</span>Transform</li>
+    <li class="step" data-step="5"><span class="step-n">5</span>Schedule</li>
+    <li class="step" data-step="6"><span class="step-n">6</span>Review &amp; run</li>
+  </ol>
+
+  <!-- step 1 -->
+  <div class="panel is-active" data-panel="1">
+    <div class="card">
+      <div class="card-head"><h2>Pick a source</h2>
+        <span class="muted">Start with <strong>Sample retail data</strong> — no credentials needed.</span></div>
+      <div class="connector-grid" id="connector-grid"></div>
+    </div>
+    <div class="card" id="config-card" hidden>
+      <div class="card-head"><h2 id="config-title">Configure</h2></div>
+      <form id="config-form" class="form"></form>
+      <div class="row-actions">
+        <button class="btn btn-primary" id="btn-check">Test connection</button>
+        <span id="check-result" class="result"></span>
+      </div>
+    </div>
+    <div class="step-nav"><span></span>
+      <button class="btn btn-primary" id="to-2" disabled>Next: choose data →</button></div>
+  </div>
+
+  <!-- step 2 -->
+  <div class="panel" data-panel="2">
+    <div class="card">
+      <div class="card-head"><h2>Choose what to sync</h2>
+        <span class="muted">Incremental streams only move new rows after the first run.</span></div>
+      <div id="stream-list" class="stream-list"></div>
+    </div>
+    <div class="card" id="preview-card" hidden>
+      <div class="card-head"><h2>Preview</h2><span class="muted" id="preview-note"></span></div>
+      <div id="stream-preview" class="table-scroll"></div>
+    </div>
+    <div class="step-nav">
+      <button class="btn" data-goto="1">← Back</button>
+      <button class="btn btn-primary" id="to-3" disabled>Next: raw tables →</button></div>
+  </div>
+
+  <!-- step 3 -->
+  <div class="panel" data-panel="3">
+    <div class="card">
+      <div class="card-head"><h2>Tables Clara will create</h2>
+        <span class="muted">Schemas are derived from the source. Columns added later are picked up automatically.</span></div>
+      <div id="table-plan"></div>
+      <div class="form form-inline">
+        <label>Raw namespace
+          <input type="text" id="raw-namespace" value="raw"></label>
+        <label>Analytics namespace
+          <input type="text" id="analytics-namespace" value="analytics"></label>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn" data-goto="2">← Back</button>
+      <button class="btn btn-primary" data-goto="4">Next: transform →</button></div>
+  </div>
+
+  <!-- step 4 -->
+  <div class="panel" data-panel="4">
+    <div class="card">
+      <div class="card-head"><h2>Transform</h2>
+        <span class="muted">SQL over your raw tables. Reference them as
+          <code>{{ source('raw','orders') }}</code> and other models as <code>{{ ref('model') }}</code>.</span></div>
+
+      <div class="form form-inline">
+        <label>Model name<input type="text" id="model-name" placeholder="daily_revenue"></label>
+        <label>Materialization
+          <select id="model-mat">
+            <option value="table">table — rebuilt each run</option>
+            <option value="view">view — computed on read</option>
+            <option value="incremental">incremental — append/merge new rows</option>
+          </select></label>
+        <label>Unique key (incremental)<input type="text" id="model-key" placeholder="order_id"></label>
+      </div>
+      <textarea id="model-sql" class="code" spellcheck="false" rows="12"></textarea>
+
+      <div class="row-actions">
+        <button class="btn" id="btn-preview-sql">Preview result</button>
+        <button class="btn btn-primary" id="btn-add-model">Add model</button>
+        <button class="btn btn-ghost" id="btn-suggest">Suggest a model</button>
+        <span id="sql-result" class="result"></span>
+      </div>
+      <div id="sql-preview" class="table-scroll"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Models</h2><span class="muted" id="model-count">none yet</span></div>
+      <div id="model-list"></div>
+    </div>
+    <div class="step-nav">
+      <button class="btn" data-goto="3">← Back</button>
+      <button class="btn btn-primary" data-goto="5">Next: schedule →</button></div>
+  </div>
+
+  <!-- step 5 -->
+  <div class="panel" data-panel="5">
+    <div class="card">
+      <div class="card-head"><h2>Schedule &amp; compute</h2></div>
+      <div class="form form-inline">
+        <label>Project name<input type="text" id="project-name" value="my_pipeline"></label>
+        <label>Schedule
+          <select id="schedule-select">
+            <option value="">Manual only</option>
+            <option value="0 * * * *">Hourly</option>
+            <option value="0 2 * * *" selected>Daily at 02:00 UTC</option>
+            <option value="0 2 * * 1">Weekly, Monday 02:00 UTC</option>
+            <option value="every 15 minutes">Every 15 minutes</option>
+          </select></label>
+        <label>Warehouse size
+          <select id="warehouse-size">
+            <option value="xs" selected>XS — 2 vCPU / 8 GB</option>
+            <option value="s">S — 4 vCPU / 16 GB</option>
+            <option value="m">M — 8 vCPU / 32 GB</option>
+            <option value="l">L — 16 vCPU / 64 GB</option>
+          </select></label>
+      </div>
+      <p class="note">Warehouses auto-suspend after 60 s idle, so you are not charged
+        for compute between runs.</p>
+    </div>
+    <div class="step-nav">
+      <button class="btn" data-goto="4">← Back</button>
+      <button class="btn btn-primary" data-goto="6">Next: review →</button></div>
+  </div>
+
+  <!-- step 6 -->
+  <div class="panel" data-panel="6">
+    <div class="card">
+      <div class="card-head"><h2>Review</h2></div>
+      <div id="review-summary"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Execution plan</h2>
+        <span class="muted">Tasks in the same row run concurrently.</span></div>
+      <div id="review-plan" class="lineage"></div>
+    </div>
+    <div class="step-nav">
+      <button class="btn" data-goto="5">← Back</button>
+      <div class="row-actions">
+        <button class="btn" id="btn-save">Save pipeline</button>
+        <button class="btn btn-primary" id="btn-save-run">Save &amp; run now</button>
+        <span id="save-result" class="result"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────── DATA ───────────────────────────────── -->
+<section class="view" id="view-data">
+  <div class="view-head"><h1>Data</h1>
+    <button class="btn" id="data-refresh">Refresh</button></div>
+  <div class="split split-narrow">
+    <div class="card">
+      <div class="card-head"><h2>Tables</h2></div>
+      <div id="data-tables"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2 id="data-detail-title">Select a table</h2>
+        <span class="muted" id="data-detail-note"></span></div>
+      <div id="data-schema"></div>
+      <div id="data-rows" class="table-scroll"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────── SQL ───────────────────────────────── -->
+<section class="view" id="view-sql">
+  <div class="view-head"><h1>SQL</h1>
+    <span class="muted">Queries are routed automatically: small scans to DuckDB, large ones to Trino.</span></div>
+  <div class="card">
+    <textarea id="sql-input" class="code" rows="8" spellcheck="false">SELECT * FROM analytics.daily_revenue ORDER BY revenue DESC LIMIT 20</textarea>
+    <div class="row-actions">
+      <button class="btn btn-primary" id="btn-run-sql">Run</button>
+      <button class="btn" id="btn-explain-sql">Explain &amp; cost</button>
+      <span id="sql-meta" class="result"></span>
+    </div>
+  </div>
+  <div class="card"><div id="sql-output" class="table-scroll"></div></div>
+</section>
+
+<!-- ────────────────────────────────── RUNS ──────────────────────────────── -->
+<section class="view" id="view-runs">
+  <div class="view-head"><h1>Runs</h1>
+    <div class="row-actions">
+      <button class="btn btn-primary" id="runs-trigger">Run pipeline</button>
+      <label class="checkbox"><input type="checkbox" id="runs-full-refresh"> full refresh</label>
+      <button class="btn" id="runs-refresh">Refresh</button>
+    </div></div>
+  <div class="split split-narrow">
+    <div class="card"><div class="card-head"><h2>History</h2></div><div id="runs-list"></div></div>
+    <div class="card"><div class="card-head"><h2 id="run-detail-title">Select a run</h2>
+      <span class="muted" id="run-detail-note"></span></div>
+      <div id="run-tasks"></div>
+      <pre id="run-logs" class="logs" hidden></pre></div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────── COST ──────────────────────────────── -->
+<section class="view" id="view-cost">
+  <div class="view-head"><h1>Cost</h1>
+    <span class="muted">Infrastructure at cost, plus a declining platform fee. Check it against your cloud bill.</span></div>
+  <div class="stat-grid" id="cost-stats"></div>
+  <div class="split">
+    <div class="card"><div class="card-head"><h2>This month</h2>
+      <span class="muted" id="cost-period"></span></div>
+      <div id="cost-usage"></div></div>
+    <div class="card"><div class="card-head"><h2>Invoice</h2>
+      <button class="btn btn-ghost" id="cost-invoice-refresh">Reload</button></div>
+      <pre id="cost-invoice" class="logs"></pre></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Where to run it</h2>
+      <span class="muted">Same warehouse, every provider — cheapest first.</span></div>
+    <div id="cost-providers"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Versus the incumbents</h2>
+      <span class="muted">1,000 CCU-hours/month. Approximate public list prices for compute.</span></div>
+    <div id="cost-compare"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<dialog id="key-dialog">
+  <form method="dialog" class="form">
+    <h2>API key</h2>
+    <p class="note">Clara printed a key when it started. Paste it here; it is stored in this
+      browser only.</p>
+    <label>Key<input type="password" id="key-input" placeholder="clara_sk_…"></label>
+    <div class="row-actions">
+      <button class="btn btn-primary" id="key-save" value="save">Save</button>
+      <button class="btn" value="cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

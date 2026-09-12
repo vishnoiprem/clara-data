@@ -1,0 +1,39 @@
+# Virtualenvs (this repo historically used .env/ as a venv directory)
+.env/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local state produced by the dev stack
+.clara/
+*.duckdb
+*.duckdb.wal
+warehouse/
+data/local/
+
+# Secrets
+*.env
+env.local
+secrets.yaml
+!env.example
+
+# Editors
+.idea/
+.vscode/
+.DS_Store
+
+# dbt
+target/
+dbt_packages/
+logs/

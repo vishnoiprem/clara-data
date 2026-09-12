@@ -1,0 +1,95 @@
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clara-data"
+version = "0.1.0"
+description = "Open, multi-cloud lakehouse platform. Databricks/Snowflake capability on commodity infrastructure."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Clara Data" }]
+keywords = ["lakehouse", "iceberg", "trino", "duckdb", "data-platform", "multi-cloud"]
+
+# Core runtime. Deliberately small: everything heavy is an optional extra and is
+# lazily imported, so `clara` stays installable on brand-new Python versions.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "sqlalchemy>=2.0",
+    "typer>=0.12",
+    "rich>=13.7",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+# Single-node / serverless query engine. Also powers the local dev stack.
+duckdb = ["duckdb>=1.0", "pyarrow>=16"]
+# Scale-out distributed SQL.
+trino = ["trino>=0.329"]
+# Apache Iceberg catalog + table maintenance.
+iceberg = ["pyiceberg[sql-sqlite,s3fs]>=0.7"]
+# Object storage across any S3-compatible provider (AWS, Tencent COS, Alibaba OSS, MinIO...).
+s3 = ["boto3>=1.34"]
+# Relational sources for the ingest framework.
+postgres = ["psycopg[binary]>=3.1"]
+# Asset-based orchestration bridge.
+dagster = ["dagster>=1.7", "dagster-webserver>=1.7"]
+# SQL transformation layer.
+dbt = ["dbt-core>=1.8", "dbt-trino>=1.8", "dbt-duckdb>=1.8"]
+# Control-plane metadata database in production.
+server = ["psycopg[binary]>=3.1", "alembic>=1.13"]
+
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+# Everything that installs cleanly on a current Python.
+all = [
+    "clara-data[duckdb,trino,iceberg,s3,postgres,server]",
+]
+
+[project.scripts]
+clara = "clara.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/clara-data/clara"
+Documentation = "https://github.com/clara-data/clara/tree/main/docs"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["clara*"]
+
+[tool.setuptools.package-data]
+clara = ["py.typed", "metering/rate_cards/*.yaml", "transform/templates/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["ignore::DeprecationWarning"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = ["B008"]  # FastAPI Depends() in defaults is idiomatic
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["clara"]
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = false

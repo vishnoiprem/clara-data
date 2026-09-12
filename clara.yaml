@@ -1,0 +1,90 @@
+version: 1
+project: retail_demo
+description: End-to-end demo — sample source, raw tables, analytics models.
+
+defaults:
+  raw_namespace: raw
+  analytics_namespace: analytics
+  warehouse: default
+
+warehouses:
+  - name: default
+    size: xs
+    engine: auto
+    # Suspend after a minute idle. Idle compute is the biggest avoidable cost.
+    auto_suspend_seconds: 60
+
+sources:
+  - name: retail
+    connector: sample
+    config:
+      orders: 2000
+      days: 60
+    streams:
+      - name: customers
+      - name: orders
+        sync_mode: incremental
+        cursor_field: ordered_at
+        primary_key: order_id
+
+models:
+  - name: order_facts
+    description: Cleaned order grain with customer attributes joined on.
+    materialization: table
+    sql: |
+      SELECT
+        o.order_id,
+        o.customer_id,
+        c.name        AS customer_name,
+        c.country,
+        o.sku,
+        o.product,
+        o.category,
+        o.quantity,
+        o.unit_price,
+        o.amount,
+        CAST(o.ordered_at AS DATE) AS order_date
+      FROM {{ source('raw', 'orders') }} o
+      LEFT JOIN {{ source('raw', 'customers') }} c
+        ON o.customer_id = c.customer_id
+    tests:
+      - type: not_null
+        column: order_id
+      - type: unique
+        column: order_id
+
+  - name: daily_revenue
+    description: Revenue by day and country — the table a dashboard reads.
+    materialization: table
+    sql: |
+      SELECT
+        order_date,
+        country,
+        count(*)              AS orders,
+        sum(quantity)         AS units,
+        round(sum(amount), 2) AS revenue
+      FROM {{ ref('order_facts') }}
+      GROUP BY order_date, country
+    tests:
+      - type: not_null
+        column: order_date
+
+  - name: category_mix
+    description: Revenue share by product category.
+    materialization: view
+    sql: |
+      SELECT
+        category,
+        round(sum(amount), 2) AS revenue,
+        round(100.0 * sum(amount) / sum(sum(amount)) OVER (), 1) AS pct_of_revenue
+      FROM {{ ref('order_facts') }}
+      GROUP BY category
+
+maintenance:
+  enabled: true
+  optimize: true
+  expire_snapshots: true
+  retain_snapshots: 5
+
+# Run every night at 02:00 UTC. Remove to keep the pipeline manual-only.
+schedule: "0 2 * * *"
