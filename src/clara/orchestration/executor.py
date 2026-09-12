@@ -280,9 +280,8 @@ class PipelineExecutor:
         for ref in tables:
             if ref.name.startswith("_clara_stage_"):
                 continue
-            if config.optimize:
-                if self._optimize(ref):
-                    optimized.append(ref.fqn)
+            if config.optimize and self._optimize(ref):
+                optimized.append(ref.fqn)
             if config.expire_snapshots:
                 count = self._expire(ref, config.retain_snapshots)
                 if count:
